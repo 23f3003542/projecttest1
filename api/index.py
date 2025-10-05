@@ -27,7 +27,7 @@ for record in data:
     region_data[record["region"]]["latencies"].append(record["latency_ms"])
     region_data[record["region"]]["uptimes"].append(record["uptime_pct"])
 
-@app.post("/api/latency")
+@app.post("/")
 async def get_metrics(request: Dict[str, Any]):
     regions = request["regions"]
     threshold_ms = request["threshold_ms"]
