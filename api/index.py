@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import json
 import os
 import statistics
-from typing import Dict, Any
+from typing import List
 from collections import defaultdict
 from mangum import Mangum
 
@@ -27,10 +28,14 @@ for record in data:
     region_data[record["region"]]["latencies"].append(record["latency_ms"])
     region_data[record["region"]]["uptimes"].append(record["uptime_pct"])
 
+class MetricsRequest(BaseModel):
+    regions: List[str]
+    threshold_ms: int
+
 @app.post("/")
-async def get_metrics(request: Dict[str, Any]):
-    regions = request["regions"]
-    threshold_ms = request["threshold_ms"]
+async def get_metrics(request: MetricsRequest):
+    regions = request.regions
+    threshold_ms = request.threshold_ms
     result = {}
     for region in regions:
         if region not in region_data:
