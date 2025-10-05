@@ -5,6 +5,7 @@ import os
 import statistics
 from typing import Dict, Any
 from collections import defaultdict
+from mangum import Mangum
 
 app = FastAPI()
 
@@ -51,3 +52,5 @@ async def get_metrics(request: Dict[str, Any]):
             "breaches": breaches
         }
     return result
+
+handler = Mangum(app)
