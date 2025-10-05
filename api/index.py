@@ -18,9 +18,15 @@ app.add_middleware(
 )
 
 # Load data
-data_file = os.path.join(os.path.dirname(__file__), "..", "q-vercel-latency.json")
-with open(data_file, "r") as f:
-    data = json.load(f)
+data_file = os.path.join(os.path.dirname(__file__), "data.json")
+try:
+    with open(data_file, "r") as f:
+        data = json.load(f)
+except FileNotFoundError:
+    # Fallback for local development
+    data_file = os.path.join(os.path.dirname(__file__), "..", "q-vercel-latency.json")
+    with open(data_file, "r") as f:
+        data = json.load(f)
 
 # Group data by region
 region_data = defaultdict(lambda: {"latencies": [], "uptimes": []})
