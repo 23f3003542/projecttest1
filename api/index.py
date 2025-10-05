@@ -17,29 +17,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load data
-data_file = os.path.join(os.path.dirname(__file__), "data.json")
-try:
-    with open(data_file, "r") as f:
-        data = json.load(f)
-except FileNotFoundError:
-    # Fallback for local development
-    data_file = os.path.join(os.path.dirname(__file__), "..", "q-vercel-latency.json")
-    with open(data_file, "r") as f:
-        data = json.load(f)
-
-# Group data by region
-region_data = defaultdict(lambda: {"latencies": [], "uptimes": []})
-for record in data:
-    region_data[record["region"]]["latencies"].append(record["latency_ms"])
-    region_data[record["region"]]["uptimes"].append(record["uptime_pct"])
-
 class MetricsRequest(BaseModel):
     regions: List[str]
     threshold_ms: int
 
+def load_and_process_data():
+    """Load data and group by region"""
+    data_file = os.path.join(os.path.dirname(__file__), "data.json")
+    try:
+        with open(data_file, "r") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        # Fallback for local development
+        data_file = os.path.join(os.path.dirname(__file__), "..", "q-vercel-latency.json")
+        with open(data_file, "r") as f:
+            data = json.load(f)
+    
+    # Group data by region
+    region_data = defaultdict(lambda: {"latencies": [], "uptimes": []})
+    for record in data:
+        region_data[record["region"]]["latencies"].append(record["latency_ms"])
+        region_data[record["region"]]["uptimes"].append(record["uptime_pct"])
+    
+    return region_data
+
 @app.post("/")
 async def get_metrics(request: MetricsRequest):
+    region_data = load_and_process_data()
     regions = request.regions
     threshold_ms = request.threshold_ms
     result = {}
