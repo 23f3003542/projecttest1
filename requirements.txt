@@ -1,4 +1,1 @@
-fastapi
-uvicorn
-pydantic
-mangum
+# No external dependencies needed
